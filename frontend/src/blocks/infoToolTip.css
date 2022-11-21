@@ -1,0 +1,43 @@
+.infoToolTip{
+    display: flex;    
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.infoToolTip__content{
+    position: relative;
+    box-sizing: border-box;
+    text-align: center;
+    width: 430px;
+    height: 330px;
+    border-radius: 10px;
+    background-color: white;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    padding: 60px 36px 60px 36px;
+    margin: 0;
+}
+.infoToolTip__close-button{
+    background-color: transparent;
+    border: none;
+    position: absolute;
+    top: -38px;
+    right: -40px;
+    background-image: url(../images/close.svg);
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+  }
+  .infoToolTip__text{
+    margin: 0;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 29px;    
+    align-self: center;
+  }

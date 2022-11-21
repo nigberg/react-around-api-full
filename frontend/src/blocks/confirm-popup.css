@@ -1,0 +1,42 @@
+.confirm-popup__container{
+  width: 430px;
+  height: 181px;
+  background-color: #FFF;
+  color: #000;
+  border-radius: 10px;
+  position: relative;
+  padding: 36px;
+  box-sizing: border-box;
+}
+.confirm-popup__question{
+  margin:  0 0 35px;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 29px;
+}
+.confirm-popup__confirm-button{
+  width: 358px;
+  height: 50px;
+  background-color: #000;
+  color: #FFF;
+  border-radius: 2px;
+}
+.confirm-popup__confirm-button:hover{
+  opacity: 60%;
+}
+.confirm-popup__close-button{
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  top: -38px;
+  right: -40px;
+  background-image: url(../images/close.svg);
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+.confirm-popup__close-button:hover{
+  opacity: 60%;
+}

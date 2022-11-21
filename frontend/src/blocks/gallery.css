@@ -1,0 +1,26 @@
+.gallery{
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+  column-gap: 17px;
+  row-gap: 20px;
+}
+@media screen and (max-width: 950px){
+  .gallery{
+    grid-template-columns: repeat(2, auto);
+    grid-template-rows: repeat(3, auto);
+    justify-content: center;
+    padding: 0 20px;
+  }
+}
+@media screen and (max-width: 650px){
+  .gallery{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+}
