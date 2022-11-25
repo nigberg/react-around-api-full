@@ -21,11 +21,16 @@
   },
   "homepage": "https://github.com/nigberg/around-express#readme",
   "dependencies": {
+    "bcrypt": "^5.1.0",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.1",
+    "cors": "^2.8.5",
     "express": "^4.18.1",
     "express-rate-limit": "^6.6.0",
     "helmet": "^6.0.0",
-    "mongoose": "^6.6.5"
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.6.5",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "eslint": "^8.23.0",

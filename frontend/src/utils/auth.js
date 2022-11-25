@@ -25,13 +25,18 @@ class Auth extends Api {
 
   validateToken(token) {
     return fetch(this._baseUrl + '/users/me', {
-      headers: { ...this._headers, Authorization: 'Bearer ' + token },
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
       method: 'GET',
     }).then(this._checkResponse)
   }
 }
 
+// export const auth = new Auth({
+//   baseUrl: 'https://register.nomoreparties.co',
+//   headers: { 'Content-Type': 'application/json' },
+// })
+
 export const auth = new Auth({
-  baseUrl: 'https://register.nomoreparties.co',
+  baseUrl: 'http://localhost:3001',
   headers: { 'Content-Type': 'application/json' },
 })

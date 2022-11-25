@@ -14,3 +14,4 @@ module.exports.MONGO_SERVER_ADDRESS = 'mongodb://localhost:27017/aroundb';
 module.exports.NOT_FOUND_MESSAGE = 'Not found error';
 module.exports.INVALID_DATA_MESSAGE = 'Invalid data error';
 module.exports.SERVER_ERROR_MESSAGE = 'Internal server error';
+module.exports.SECRET_KEY = 'ptnpnh';

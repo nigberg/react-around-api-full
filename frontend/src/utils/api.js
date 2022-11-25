@@ -11,73 +11,72 @@ export class Api {
     return Promise.reject(`Error ${res.status}`);
   }
 
-  getUserInfo() {
+  getUserInfo(token) {
     return fetch(this._baseUrl + "/users/me", {
-      headers: this._headers,
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
     }).then(this._checkResponse);
   }
 
-  getInitialCards() {
+  getInitialCards(token) {
     return fetch(this._baseUrl + "/cards", {
-      headers: this._headers,
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
     }).then(this._checkResponse);
   }
 
-  editProfile({ name, about }) {
+  editProfile({ name, about, token }) {
     return fetch(this._baseUrl + "/users/me", {
       method: "PATCH",
-      headers: this._headers,
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
       body: JSON.stringify({ name, about }),
     }).then(this._checkResponse);
   }
 
-  addNewCard({ name, link }) {
+  addNewCard({ name, link, token }) {
     return fetch(this._baseUrl + "/cards", {
       method: "POST",
-      headers: this._headers,
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
       body: JSON.stringify({ name, link }),
     }).then(this._checkResponse);
   }
 
-  addLike(cardId) {
+  addLike(cardId, token) {
     return fetch(this._baseUrl + "/cards/likes/" + cardId, {
       method: "PUT",
-      headers: this._headers,
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
     }).then(this._checkResponse);
   }
 
-  removeLike(cardId) {
+  removeLike(cardId, token) {
     return fetch(this._baseUrl + "/cards/likes/" + cardId, {
       method: "DELETE",
-      headers: this._headers,
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
     }).then(this._checkResponse);
   }
 
-  deleteCard(cardId) {
+  deleteCard(cardId, token) {
     return fetch(this._baseUrl + "/cards/" + cardId, {
       method: "DELETE",
-      headers: this._headers,
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
     }).then(this._checkResponse);
   }
 
-  changeLikeCardStatus(cardId, isLiked) {
+  changeLikeCardStatus(cardId, isLiked, token) {
     console.log(isLiked);
-    return isLiked ? this.removeLike(cardId) : this.addLike(cardId);
+    return isLiked ? this.removeLike(cardId, token) : this.addLike(cardId, token);
   }
 
-  setAvatar(avatar) {
+  setAvatar(avatar, token) {
     return fetch(this._baseUrl + "/users/me/avatar", {
       method: "PATCH",
-      headers: this._headers,
+      headers: { ...this._headers, authorization: 'Bearer ' + token },
       body: JSON.stringify({ avatar }),
     }).then(this._checkResponse);
   }
 }
 
 export const api = new Api({
-  baseUrl: "https://around.nomoreparties.co/v1/cohort-3-en",
-  headers: {
-    authorization: "4b9721d4-f98e-4ede-ad68-f8f2c3264077",
+  baseUrl: "http://localhost:3001",
+  headers: {    
     "Content-Type": "application/json",
   },
 });

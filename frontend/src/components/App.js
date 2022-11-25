@@ -32,47 +32,23 @@ function App() {
   const [waiting, setWaiting] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [jwt, setJwt] = useState(localStorage.getItem('jwt'))
 
   const history = useHistory()
 
-  //Current user data fetch on mounting
   useEffect(() => {
-    api
-      .getUserInfo()
-      .then((res) => {
-        setCurrentUser(res)
+    Promise.allSettled([auth.validateToken(jwt), api.getInitialCards(jwt)])
+      .then((values) => {
+        setCurrentUser(values[0].value.data)
+        setLoggedIn(true)
+        setUserEmail(values[0].value.data.email)
+        setCards(values[1].value.data)
+        history.push('/')
       })
-      .catch(console.log)
-  }, [])
-
-  //Cards fetching
-  useEffect(() => {
-    api
-      .getInitialCards()
-      .then((res) => {
-        setCards(res)
+      .catch((err) => {
+        console.log(err)
       })
-      .catch(console.log)
-  }, [])
-
-  //Token check
-  useEffect(() => {
-    const jwt = localStorage.getItem('jwt')
-    if (jwt) {
-      auth
-        .validateToken(jwt)
-        .then((res) => {
-          if (res) {
-            setUserEmail(res.data.email)
-            setLoggedIn(true)
-            history.push('/')
-          }
-        })
-        .catch((err) => {
-          console.log(err)
-        })
-    }
-  }, [])
+  }, [loggedIn])
 
   const handleEditAvatarClick = () => {
     setIsEditAvatarPopupOpen(true)
@@ -92,14 +68,15 @@ function App() {
   }
 
   const handleCardLike = (card) => {
-    const isLiked = card.likes.some((user) => user._id === currentUser._id)
+    const isLiked = card.likes.some((user) => user === currentUser._id)
+    console.log(card.likes[0]+' '+currentUser._id+' isLiked: '+isLiked)
 
     api
-      .changeLikeCardStatus(card._id, isLiked)
+      .changeLikeCardStatus(card._id, isLiked, jwt)
       .then((newCard) => {
         setCards((state) =>
           state.map((currentCard) =>
-            currentCard._id === card._id ? newCard : currentCard,
+            currentCard._id === card._id ? newCard.data : currentCard,
           ),
         )
       })
@@ -107,11 +84,11 @@ function App() {
   }
 
   const handleCardDelete = (card) => {
-    setWaiting(true)    
+    setWaiting(true)
     api
-      .deleteCard(card._id)
-      .then(() => {
-        setCards(cards.filter((item) => item._id !== card._id))
+      .deleteCard(card._id, jwt)
+      .then((removedCard) => {        
+        setCards(cards.filter((item) => item._id !== removedCard.data._id))
       })
       .catch(console.log)
       .finally(() => {
@@ -158,12 +135,11 @@ function App() {
   }, [isAnyPopupOpen])
 
   function handleUpdateUser({ name, about }) {
-    setWaiting(true)
+    setWaiting(true)    
     api
-      .editProfile({ name, about })
-      .then((newUserInfo) => {
-        console.log(waiting)
-        setCurrentUser(newUserInfo)
+      .editProfile({ name, about, token: jwt })
+      .then((newUserInfo) => {        
+        setCurrentUser(newUserInfo.data)
         closeAllPopups()
       })
       .catch(console.log)
@@ -175,9 +151,9 @@ function App() {
   function hanldeUpdateAvatar(avatarUrl) {
     setWaiting(true)
     api
-      .setAvatar(avatarUrl)
+      .setAvatar(avatarUrl, jwt)
       .then((newUserInfo) => {
-        setCurrentUser(newUserInfo)
+        setCurrentUser(newUserInfo.data)
         closeAllPopups()
       })
       .catch(console.log)
@@ -189,9 +165,9 @@ function App() {
   function handleAddPlaceSubmit({ name, link }) {
     setWaiting(true)
     api
-      .addNewCard({ name, link })
+      .addNewCard({ name, link, token: jwt })
       .then((newCard) => {
-        setCards([newCard, ...cards])
+        setCards([newCard.data, ...cards])
         closeAllPopups()
       })
       .catch(console.log)
@@ -202,6 +178,7 @@ function App() {
 
   function handleLogout() {
     localStorage.removeItem('jwt')
+    setJwt('')
     setLoggedIn(false)
     history.push('/login')
   }
@@ -210,8 +187,9 @@ function App() {
     setWaiting(true)
     auth
       .authenticate(userData)
-      .then((user) => {
-        localStorage.setItem('jwt', user.token)
+      .then((data) => {
+        localStorage.setItem('jwt', data.token)
+        setJwt(data.token)        
         setLoggedIn(true)
         setUserEmail(userData.email)
         history.push('/')
@@ -317,11 +295,11 @@ function App() {
         />
 
         <ConfirmPopup
-        isOpen={isConfirmPopupOpen}
-        onClose={closeAllPopups}
-        isWaiting={waiting}
-        onCardDelete={handleCardDelete}
-        cardToDelete={cardToDelete}
+          isOpen={isConfirmPopupOpen}
+          onClose={closeAllPopups}
+          isWaiting={waiting}
+          onCardDelete={handleCardDelete}
+          cardToDelete={cardToDelete}
         />
       </CurrentUserContext.Provider>
     </div>
