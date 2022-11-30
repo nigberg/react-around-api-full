@@ -9,6 +9,10 @@ const cardsRouter = require('./routes/cards');
 const { login, createUser} = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { NOT_FOUND_CODE, RATE_LIMITER_CONFIGURATIONS, MONGO_SERVER_ADDRESS } = require('./utils/constants');
+const centralizedErrorHandler = require('./middlewares/centralizedErrorHandler');
+const { errors } = require('celebrate');
+const { signinValidator, signupValidator } = require('./utils/celebrateValidators');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const limiter = rateLimit(RATE_LIMITER_CONFIGURATIONS);
 
@@ -20,14 +24,18 @@ app.use(cors())
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.use(requestLogger);
+app.post('/signin', signinValidator, login);
+app.post('/signup', signupValidator, createUser);
 app.use(auth);
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
 app.use((req, res) => {
   res.status(NOT_FOUND_CODE).send({ message: `Route ${req.url} not found` });
 });
+app.use(errorLogger);
+app.use(errors);
+app.use(centralizedErrorHandler);
 const { PORT = 3000 } = process.env;
 
 app.listen(3001, () => {

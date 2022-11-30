@@ -9,73 +9,55 @@ const {
   SERVER_ERROR_MESSAGE,
   SECRET_KEY,
 } = require('../utils/constants')
+
+const { NotFoundError, AuthorizationError, BadRequestError, ForbiddenError, ConflictError } = require('../utils/errors')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const User = require('../models/user')
 
-const getAllUsers = (req, res) => {
+const getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.status(OK_CODE).send({ data: users })
     })
-    .catch(() => {
-      res.status(SERVER_ERROR_CODE).send({ message: SERVER_ERROR_MESSAGE })
-    })
+    .catch(next)
 }
 
-const getCurrentUserInfo = (req, res) => {
+const getCurrentUserInfo = (req, res, next) => {
   const { _id } = req.user
   User.findById(_id)
     .orFail(() => {
-      const err = new Error(NOT_FOUND_MESSAGE)
-      err.status = NOT_FOUND_CODE
+      const err = new NotFoundError(NOT_FOUND_MESSAGE)
       throw err
     })
     .then((user) => {
       res.status(OK_CODE).send({ data: user })
     })
-    .catch((err) => {
-      if (err.status === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message })
-      } else if (err.name === 'CastError') {
-        res.status(INVALID_DATA_CODE).send({ message: INVALID_DATA_MESSAGE })
-      } else {
-        res.status(SERVER_ERROR_CODE).send({ message: SERVER_ERROR_MESSAGE })
-      }
-    })
+    .catch(next)
 }
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   const { id } = req.params
   User.findById(id)
     .orFail(() => {
-      const err = new Error(NOT_FOUND_MESSAGE)
-      err.status = NOT_FOUND_CODE
+      const err = new NotFoundError(NOT_FOUND_MESSAGE)
       throw err
     })
     .then((user) => {
       res.status(OK_CODE).send({ data: user })
     })
-    .catch((err) => {
-      if (err.status === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message })
-      } else if (err.name === 'CastError') {
-        res.status(INVALID_DATA_CODE).send({ message: INVALID_DATA_MESSAGE })
-      } else {
-        res.status(SERVER_ERROR_CODE).send({ message: SERVER_ERROR_MESSAGE })
-      }
-    })
+    .catch(next)
 }
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body
   User.findOne({ email })
     .then((user) => {
       if (!password) {
-        return Promise.reject(new Error('pwd required'))
+        return Promise.reject(new BadRequestError('Password is missing'))
       }
       if (user) {
-        return Promise.reject(new Error('user exists'))
+        return Promise.reject(new ConflictError('User with this email is already exists'))
       }
       return bcrypt.hash(password, 10)
     })
@@ -85,25 +67,15 @@ const createUser = (req, res) => {
     .then((user) => {
       res.status(OK_CREATED_CODE).send({ data: user })
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        const errorsMessage = `${Object.values(err.errors)
-          .map((error) => error.message)
-          .join(', ')}`
-        res.status(INVALID_DATA_CODE).send({ message: errorsMessage })
-      } else {
-        res.status(SERVER_ERROR_CODE).send({ message: SERVER_ERROR_MESSAGE })
-      }
-    })
+    .catch(next)
 }
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const userId = req.user._id
   const { name, about } = req.body
   User.findById(userId)
     .orFail(() => {
-      const err = new Error(NOT_FOUND_MESSAGE)
-      err.status = NOT_FOUND_CODE
+      const err = new NotFoundError(NOT_FOUND_MESSAGE)
       throw err
     })
     .then((user) => {
@@ -116,51 +88,24 @@ const updateProfile = (req, res) => {
     .then((updatedUser) => {
       res.status(OK_CREATED_CODE).send({ data: updatedUser })
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        const errorsMessage = `${Object.values(err.errors)
-          .map((error) => error.message)
-          .join(', ')}`
-        res.status(INVALID_DATA_CODE).send({ message: errorsMessage })
-      } else if (err.name === 'CastError') {
-        res.status(INVALID_DATA_CODE).send({ message: INVALID_DATA_MESSAGE })
-      } else if (err.status === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message })
-      } else {
-        res.status(SERVER_ERROR_CODE).send({ message: SERVER_ERROR_MESSAGE })
-      }
-    })
+    .catch(next)
 }
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const userId = req.user._id
   const { avatar } = req.body
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .orFail(() => {
-      const err = new Error(NOT_FOUND_MESSAGE)
-      err.status = NOT_FOUND_CODE
+      const err = new NotFoundError(NOT_FOUND_MESSAGE)
       throw err
     })
     .then((user) => {
       res.status(OK_CREATED_CODE).send({ data: user })
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        const errorsMessage = `${Object.values(err.errors)
-          .map((error) => error.message)
-          .join(', ')}`
-        res.status(INVALID_DATA_CODE).send({ message: errorsMessage })
-      } else if (err.name === 'CastError') {
-        res.status(INVALID_DATA_CODE).send({ message: INVALID_DATA_MESSAGE })
-      } else if (err.status === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message })
-      } else {
-        res.status(SERVER_ERROR_CODE).send({ message: SERVER_ERROR_MESSAGE })
-      }
-    })
+    .catch(next)
 }
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -168,9 +113,7 @@ const login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' })
       res.send({ token })
     })
-    .catch((err) => {
-      res.status(401).send(err.message)
-    })
+    .catch(next)
 }
 
 module.exports = {
