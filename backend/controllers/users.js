@@ -14,6 +14,7 @@ const { NotFoundError, AuthorizationError, BadRequestError, ForbiddenError, Conf
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const User = require('../models/user')
+const { SECRET_JWT = SECRET_KEY } = process.env
 
 const getAllUsers = (req, res, next) => {
   User.find({})
@@ -110,7 +111,7 @@ const login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       // user found
-      const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' })
+      const token = jwt.sign({ _id: user._id }, SECRET_JWT, { expiresIn: '7d' })
       res.send({ token })
     })
     .catch(next)
