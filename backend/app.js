@@ -43,7 +43,7 @@ app.use(errors);
 app.use(centralizedErrorHandler);
 
 const { NODE_ENV = 'test' } = process.env;
-const { PORT = 3000 } = (NODE_ENV === 'test') ? { PORT: 3001 } : process.env;
+const { PORT = 3000 } = process.env;
 
 
 app.listen(PORT, () => {
