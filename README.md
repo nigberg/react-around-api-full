@@ -19,7 +19,7 @@ _Javascript_
 _ReactJS_
 _Fetch API_
 
-**Technologies I used on BAckend:**
+**Technologies I used on Backend:**
 _NodeJS_
 _ExpressJS_
 _MongoDB_
@@ -30,6 +30,10 @@ _Visual Studio Code_
 **The application is hosted on Google cloud server**
   
 [Link to the application](https://nigberg.students.nomoredomainssbs.ru)
+
+You can also login the site using existing credentials:
+username: kuku@yandex.com
+password: 11111111
  
   
 
