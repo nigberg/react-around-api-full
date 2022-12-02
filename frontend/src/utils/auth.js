@@ -37,6 +37,6 @@ class Auth extends Api {
 // })
 
 export const auth = new Auth({
-  baseUrl: 'http://localhost:3001',
+  baseUrl: 'https://api.nigberg.students.nomoredomainssbs.ru',
   headers: { 'Content-Type': 'application/json' },
 })
