@@ -1,89 +1,106 @@
 const {
-  OK_CODE,
   OK_CREATED_CODE,
-  INVALID_DATA_CODE,
-  NOT_FOUND_CODE,
-  SERVER_ERROR_CODE,
   NOT_FOUND_MESSAGE,
-  INVALID_DATA_MESSAGE,
-  SERVER_ERROR_MESSAGE,
-  AUTHORIZATION_ERROR_MESSAGE
-} = require('../utils/constants')
+} = require('../utils/constants');
 
-const { NotFoundError, AuthorizationError, BadRequestError, ForbiddenError } = require('../utils/errors')
-const Card = require('../models/card')
+const NotFoundError = require('../utils/errors/NotFoundError');
+const ForbiddenError = require('../utils/errors/ForbiddenError');
+const BadRequestError = require('../utils/errors/BadRequestError');
+const Card = require('../models/card');
 
 const getAllCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
-      res.status(OK_CODE).send({ data: cards })
+      res.send({ data: cards });
     })
-    .catch(next)
-}
+    .catch(next);
+};
 
 const createCard = (req, res, next) => {
-  const { name, link } = req.body
-  const owner = req.user._id
+  const { name, link } = req.body;
+  const owner = req.user._id;
   Card.create({ name, owner, link })
     .then((card) => {
-      res.status(OK_CREATED_CODE).send({ data: card })
+      res.status(OK_CREATED_CODE).send({ data: card });
     })
-    .catch(next)
-}
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Invalid data'));
+      } else {
+        next(err);
+      }
+    });
+};
 
 const deleteCard = (req, res, next) => {
-  const { cardId } = req.params
+  const { cardId } = req.params;
   Card.findById(cardId)
     .orFail(() => {
-      const err = new NotFoundError(NOT_FOUND_MESSAGE)
-      throw err
+      const err = new NotFoundError(NOT_FOUND_MESSAGE);
+      throw err;
     })
     .then((card) => {
-      console.log("found card for\delete "+card)
       if (card.owner.toString() !== req.user._id) {
-        const err = new ForbiddenError('Not allowed')
-        throw err
+        const err = new ForbiddenError('Not allowed');
+        throw err;
       }
-      return Card.findByIdAndDelete(cardId)
+      return Card.findByIdAndDelete(cardId);
     })
     .then((removedCard) => {
-      console.log(removedCard)
-      res.send({ data: removedCard })
+      res.send({ data: removedCard });
     })
-    .catch(next)
-}
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Invalid ID'));
+      } else {
+        next(err);
+      }
+    });
+};
 
 const likeCard = (req, res, next) => {
-  const userId = req.user._id
-  const { cardId } = req.params
+  const userId = req.user._id;
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: userId } },
     { new: true },
   )
     .orFail(() => {
-      const err = new NotFoundError(NOT_FOUND_MESSAGE)
-      throw err
+      const err = new NotFoundError(NOT_FOUND_MESSAGE);
+      throw err;
     })
     .then((card) => {
-      res.status(OK_CREATED_CODE).send({ data: card })
+      res.status(OK_CREATED_CODE).send({ data: card });
     })
-    .catch(next)
-}
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Invalid ID'));
+      } else {
+        next(err);
+      }
+    });
+};
 
 const unlikeCard = (req, res, next) => {
-  const userId = req.user._id
-  const { cardId } = req.params
+  const userId = req.user._id;
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .orFail(() => {
-      const err = new NotFoundError(NOT_FOUND_MESSAGE)
-      throw err
+      const err = new NotFoundError(NOT_FOUND_MESSAGE);
+      throw err;
     })
     .then((card) => {
-      res.status(OK_CREATED_CODE).send({ data: card })
+      res.status(OK_CREATED_CODE).send({ data: card });
     })
-    .catch(next)
-}
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Invalid ID'));
+      } else {
+        next(err);
+      }
+    });
+};
 
 module.exports = {
   getAllCards,
@@ -91,4 +108,4 @@ module.exports = {
   deleteCard,
   likeCard,
   unlikeCard,
-}
+};

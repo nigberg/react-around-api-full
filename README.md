@@ -30,6 +30,7 @@ _Visual Studio Code_
 **The application is hosted on Google cloud server**
   
 [Link to the application](https://nigberg.students.nomoredomainssbs.ru)
+[Link to API](https://api.nigberg.students.nomoredomainssbs.ru)
 
 You can also login the site using existing credentials:
 username: kuku@yandex.com

@@ -1,7 +1,8 @@
-const mongoose = require('mongoose')
-const valid = require('validator')
-const bcrypt = require('bcryptjs')
-const { URL_REGEXP } = require('../utils/constants')
+const mongoose = require('mongoose');
+const valid = require('validator');
+const bcrypt = require('bcryptjs');
+const { URL_REGEXP } = require('../utils/constants');
+const AuthorizationError = require('../utils/errors/AuthorizationError');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -10,7 +11,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator(v) {
-        return valid.isEmail(v)
+        return valid.isEmail(v);
       },
       message: 'Incorrect email',
     },
@@ -38,12 +39,12 @@ const userSchema = new mongoose.Schema({
     default: 'https://pictures.s3.yandex.net/resources/avatar_1604080799.jpg',
     validate: {
       validator(v) {
-        return URL_REGEXP.test(v)
+        return URL_REGEXP.test(v);
       },
       message: 'Avatar URL is not correct',
     },
   },
-})
+});
 
 userSchema.statics.findUserByCredentials = function findUserByCredentials(
   email,
@@ -53,15 +54,15 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(
     .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Incorrect email or password'))
+        return Promise.reject(new AuthorizationError('Incorrect email or password'));
       }
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(new Error('Incorrect email or password'))
+          return Promise.reject(new AuthorizationError('Incorrect email or password'));
         }
-        return user
-      })
-    })
-}
+        return user;
+      });
+    });
+};
 
-module.exports = mongoose.model('user', userSchema)
+module.exports = mongoose.model('user', userSchema);
