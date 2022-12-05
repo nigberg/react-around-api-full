@@ -6,14 +6,12 @@ const {
   NOT_FOUND_MESSAGE,
   SECRET_KEY,
 } = require('../utils/constants');
-
 const NotFoundError = require('../utils/errors/NotFoundError');
 const BadRequestError = require('../utils/errors/BadRequestError');
 const ConflictError = require('../utils/errors/ConflictError');
-
 const User = require('../models/user');
 
-const { SECRET_JWT = SECRET_KEY } = process.env;
+const SECRET_JWT = (process.env.NODE_ENV !== 'production') ? SECRET_KEY : process.env.SECRET_JWT;
 
 const getAllUsers = (req, res, next) => {
   User.find({})
